@@ -1,3 +1,4 @@
+// src/pages/Login.tsx
 import { useState } from "react";
 import { login } from "../api/auth";
 import { useAuth } from "../auth/AuthContext";
@@ -8,14 +9,14 @@ export default function Login() {
   const [password, setP] = useState("");
   const [err, setErr] = useState("");
   const nav = useNavigate();
-  const { setToken } = useAuth();
+  const { setTokens } = useAuth();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr("");
     try {
-      const { token } = await login(username, password);
-      setToken(token);
+      const { accessToken, refreshToken } = await login(username, password);
+      setTokens(accessToken, refreshToken);
       nav("/");
     } catch (e: any) {
       setErr(e?.response?.data?.message || "Giriş başarısız");

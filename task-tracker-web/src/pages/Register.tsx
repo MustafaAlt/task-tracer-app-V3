@@ -1,3 +1,4 @@
+// src/pages/Register.tsx
 import { useState } from "react";
 import { register } from "../api/auth";
 import { useAuth } from "../auth/AuthContext";
@@ -8,14 +9,14 @@ export default function Register() {
   const [password, setP] = useState("");
   const [err, setErr] = useState("");
   const nav = useNavigate();
-  const { setToken } = useAuth();
+  const { setTokens } = useAuth();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr("");
     try {
-      const { token } = await register(username, password);
-      setToken(token);
+      const { accessToken, refreshToken } = await register(username, password);
+      setTokens(accessToken, refreshToken);
       nav("/");
     } catch (e: any) {
       setErr(e?.response?.data?.message || "Kayıt başarısız");
