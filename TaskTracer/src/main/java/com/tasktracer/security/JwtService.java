@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
@@ -17,6 +18,7 @@ public class JwtService {
 
     private final Key key;
     private final long accessExpMillis;
+    private final long refreshExpMillis;
     private final String issuer;
     private final String audience;
 
@@ -67,21 +69,65 @@ public class JwtService {
                 env.getProperty("SECURITY_JWT_ISSUER"));
         this.audience = defaultString(env.getProperty("security.jwt.audience"),
                 env.getProperty("SECURITY_JWT_AUDIENCE"));
+
+        long refreshExpDays = parseLongOrDefault(
+                firstNonBlank(env.getProperty("security.jwt.refresh-exp-days"),
+                        env.getProperty("SECURITY_JWT_REFRESH_EXP_DAYS")),
+                7L);
+        this.refreshExpMillis = ChronoUnit.DAYS.getDuration().toMillis() * refreshExpDays;
+
     }
 
+    /* === ACCESS TOKEN === */
     public String generateAccessToken(String username, Map<String, Object> extraClaims) {
         Instant now = Instant.now();
-        JwtBuilder builder = Jwts.builder()
+        JwtBuilder b = Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(username)
                 .setIssuedAt(Date.from(now))
                 .setExpiration(new Date(now.toEpochMilli() + accessExpMillis))
                 .signWith(key, SignatureAlgorithm.HS256);
+        if (!isBlank(issuer))   b.setIssuer(issuer);
+        if (!isBlank(audience)) b.setAudience(audience);
+        return b.compact();
+    }
+    public boolean isAccessTokenValid(String token, String username) {
+        Claims c = parseAllClaims(token);
+        return "access".equals(c.get("typ", String.class)) // aşağıda setAccessType ile koyacağız
+                ? username.equals(c.getSubject()) && c.getExpiration().after(new Date())
+                : username.equals(c.getSubject()) && c.getExpiration().after(new Date()); // geriye dönük uyumluluk
+    }
+    /* === REFRESH TOKEN === */
+    public String generateRefreshToken(String username, int tokenVersion) {
+        Instant now = Instant.now();
+        JwtBuilder b = Jwts.builder()
+                .claim("typ", "refresh")     // işaretleyelim
+                .claim("tver", tokenVersion) // user.tokenVersion
+                .setSubject(username)
+                .setIssuedAt(Date.from(now))
+                .setExpiration(new Date(now.toEpochMilli() + refreshExpMillis))
+                .signWith(key, SignatureAlgorithm.HS256);
+        if (!isBlank(issuer))   b.setIssuer(issuer);
+        if (!isBlank(audience)) b.setAudience(audience);
+        return b.compact();
+    }
 
-        if (!isBlank(issuer))   builder.setIssuer(issuer);
-        if (!isBlank(audience)) builder.setAudience(audience);
+    public boolean isRefreshTokenValid(String token, String expectedUsername, int currentTokenVersion) {
+        Claims c = parseAllClaims(token);
+        boolean isRefresh = "refresh".equals(c.get("typ", String.class));
+        Integer tver = c.get("tver", Integer.class);
+        return isRefresh
+                && expectedUsername.equals(c.getSubject())
+                && c.getExpiration().after(new Date())
+                && tver != null
+                && tver == currentTokenVersion;
+    }
 
-        return builder.compact();
+    /* İsteğe bağlı: access token’ı da typ=access diye işaretleyelim */
+    public String generateAccessTokenWithType(String username, Map<String,Object> claims) {
+        if (claims == null) claims = new java.util.HashMap<>();
+        claims.put("typ", "access");
+        return generateAccessToken(username, claims);
     }
 
     public String extractUsername(String token) {
@@ -112,4 +158,8 @@ public class JwtService {
     private static long parseLongOrDefault(String s, long def) {
         try { return isBlank(s) ? def : Long.parseLong(s.trim()); } catch (Exception e) { return def; }
     }
+
+
+
+
 }

@@ -26,6 +26,8 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     @Column(nullable=false)
     private Role role;
+    @Builder.Default
+    private Integer tokenVersion = 0;
 
 
     @Override public Collection<? extends GrantedAuthority> getAuthorities() {
