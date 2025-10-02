@@ -58,32 +58,31 @@ en son bu tokenı aynı şekilde koyduktan sonra get metodu ile tüm görevleri 
 
 
 
+<h1> REFRESH TOKEN EKLENDİ :</h1>
+<img width="1121" height="730" alt="{CE4AF08D-4217-4370-BB70-ACB6FB0B6A79}" src="https://github.com/user-attachments/assets/9a509ca6-bb26-4348-be11-74dd39e25adc" />
+mantık aynı aslında refresh token döndük kullanıcının acces tokenının süresi bitince refresh tokena istek atar ve tekrar bir acces token alır. oaly bu aslında. 
 
 
-<h2>Özellikler </h2> 
-JWT (JSON Web Token) ile güvenli kullanıcı kimlik doğrulama.
+<img width="1138" height="675" alt="{648CFB51-8BA2-4A69-9E6A-8BFF1715F095}" src="https://github.com/user-attachments/assets/e66f71be-33cb-4655-b311-6468866d8cde" />                                              <img width="1106" height="627" alt="{CB6A1E95-4131-4CB5-B16F-5A416E750669}" src="https://github.com/user-attachments/assets/0e1c7b88-cad7-4c01-ade1-f01d02ed46f5" />
+bu şekilde refresh token ile istek attıktan sonra tekrar acces token almış oluyoruz. 
 
-Kullanıcıya özel görev listesi.
 
-Görev ekleme, düzenleme, silme ve tamamlama işlemleri.
 
-Ön yüz (frontend) geliştirme için Vite kullanılmıştır.
 
-Java Spring Boot ve React'ı birleştiren tam yığın (full-stack) bir yapı.
 
-<h2>Teknolojiler</h2>
-Frontend:
 
-React: Kullanıcı arayüzü kütüphanesi.
 
-Vite: Hızlı ve modern derleme aracı.
 
-Backend:
 
-Java: Uygulamanın arka yüz programlama dili.
 
-Spring Boot: Backend servisi oluşturmak için kullanılan popüler bir framework.
 
-[PostgreSQL]
 
-<h3>JWT: Güvenli kullanıcı kimlik doğrulaması için.</h3>
+
+
+
+
+
+
+
+
+
